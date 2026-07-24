@@ -1,20 +1,47 @@
-import { Button } from '@/components/ui/button'
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom"
+
+import { LoginPage } from "@/pages/LoginPage"
+import { RegisterPage } from "@/pages/RegisterPage"
+import { CandidateDashboardPage } from "@/pages/CandidateDashboardPage"
+import { RecruiterDashboardPage } from "@/pages/RecruiterDashboardPage"
+import { ProtectedRoute } from "@/routes/ProtectedRoute"
 
 function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="space-y-4 text-center">
-        <h1 className="text-3xl font-semibold">
-          AI Resume Intelligence Platform
-        </h1>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={<Navigate to="/login" replace />}
+        />
 
-        <p className="text-muted-foreground">
-          Frontend foundation is ready.
-        </p>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-        <Button>Get Started</Button>
-      </div>
-    </main>
+        <Route
+          element={<ProtectedRoute allowedRole="CANDIDATE" />}
+        >
+          <Route
+            path="/candidate/dashboard"
+            element={<CandidateDashboardPage />}
+          />
+        </Route>
+
+        <Route
+          element={<ProtectedRoute allowedRole="RECRUITER" />}
+        >
+          <Route
+            path="/recruiter/dashboard"
+            element={<RecruiterDashboardPage />}
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 

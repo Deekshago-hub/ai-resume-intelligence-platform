@@ -1,0 +1,19 @@
+# Environment variables
+.env
+.env.*
+
+# Frontend
+node_modules/
+dist/
+
+# Backend
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

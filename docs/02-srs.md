@@ -1,0 +1,695 @@
+# AI Resume Intelligence Platform
+
+## Software Requirements Specification (SRS)
+
+**Version:** 1.0
+**Status:** Approved
+**Related Document:** `01-project-vision.md`
+
+---
+
+## 1. Purpose
+
+This document defines the functional and non-functional requirements for Version 1 of the AI Resume Intelligence Platform.
+
+The system provides:
+
+1. general AI-powered resume analysis;
+2. job-specific resume matching;
+3. lightweight job posting and application management.
+
+The primary focus of Version 1 is the candidate resume intelligence and job-matching experience.
+
+---
+
+## 2. User Roles
+
+Version 1 supports two roles.
+
+### Candidate
+
+A candidate can:
+
+* register and authenticate;
+* upload resumes;
+* view general resume analysis;
+* analyze a resume against a job description;
+* browse platform jobs;
+* apply to jobs;
+* view application status.
+
+### Recruiter
+
+A recruiter can:
+
+* register and authenticate;
+* create jobs;
+* view their jobs;
+* view applicants;
+* inspect applicant resumes and available analysis;
+* shortlist or reject applicants.
+
+---
+
+# 3. Functional Requirements
+
+Requirement priorities:
+
+* **P0** — required for the core MVP;
+* **P1** — required for the portfolio-ready release;
+* **P2** — optional enhancement.
+
+---
+
+## 3.1 Authentication and Authorization
+
+### FR-AUTH-01 — Candidate Registration [P0]
+
+The system shall allow a candidate to register using:
+
+* name;
+* email;
+* password.
+
+Email addresses must be unique.
+
+Passwords must never be stored as plain text.
+
+---
+
+### FR-AUTH-02 — Recruiter Registration [P0]
+
+The system shall allow a recruiter to register using:
+
+* name;
+* email;
+* password.
+
+The account shall receive the `RECRUITER` role.
+
+---
+
+### FR-AUTH-03 — Login [P0]
+
+The system shall allow registered users to authenticate using email and password.
+
+Successful authentication shall return an access token used to authenticate protected requests.
+
+---
+
+### FR-AUTH-04 — Role-Based Authorization [P0]
+
+The system shall support:
+
+* `CANDIDATE`
+* `RECRUITER`
+
+Candidate-only operations shall not be accessible to recruiters unless explicitly allowed.
+
+Recruiter-only operations shall not be accessible to candidates.
+
+---
+
+## 3.2 Resume Management
+
+### FR-RES-01 — Resume Upload [P0]
+
+A candidate shall be able to upload a resume in PDF format.
+
+---
+
+### FR-RES-02 — Resume Validation [P0]
+
+The backend shall validate:
+
+* file type;
+* file size;
+* empty files.
+
+Invalid files shall be rejected with an understandable error response.
+
+---
+
+### FR-RES-03 — Resume Storage [P0]
+
+Uploaded PDF files shall be stored using Supabase Storage.
+
+The application database shall store metadata required to identify and retrieve the resume.
+
+---
+
+### FR-RES-04 — Resume Ownership [P0]
+
+A candidate shall only be able to access resumes they own.
+
+---
+
+### FR-RES-05 — Resume Text Extraction [P0]
+
+The system shall extract text from supported PDF resumes before AI analysis.
+
+Version 1 does not require OCR support for image-only/scanned PDFs.
+
+---
+
+### FR-RES-06 — View Resumes [P0]
+
+A candidate shall be able to view their uploaded resumes and relevant metadata.
+
+---
+
+## 3.3 General Resume Intelligence
+
+### FR-RA-01 — Analyze Resume [P0]
+
+A candidate shall be able to request general analysis of an uploaded resume.
+
+---
+
+### FR-RA-02 — Resume Analysis Output [P0]
+
+The system shall request structured AI output containing:
+
+* Resume Quality Score;
+* Resume Summary;
+* Extracted Skills;
+* Strengths;
+* Weaknesses.
+
+---
+
+### FR-RA-03 — Structured AI Response [P0]
+
+AI output shall be converted into a defined backend data structure.
+
+The application shall not rely on arbitrary AI-generated text as its API contract.
+
+---
+
+### FR-RA-04 — Analysis Persistence [P0]
+
+Successful resume analysis results shall be stored in PostgreSQL.
+
+---
+
+### FR-RA-05 — Analysis Status [P0]
+
+Resume analysis shall support statuses such as:
+
+* `PENDING`;
+* `PROCESSING`;
+* `COMPLETED`;
+* `FAILED`.
+
+---
+
+### FR-RA-06 — Analysis Failure [P0]
+
+If analysis fails, the system shall:
+
+* mark the analysis as failed;
+* return/display an understandable error state;
+* avoid leaving the analysis permanently in a processing state.
+
+---
+
+### FR-RA-07 — Retry Analysis [P1]
+
+The candidate should be able to retry a failed analysis.
+
+---
+
+## 3.4 Job Match Analysis
+
+### FR-MATCH-01 — External Job Description [P0]
+
+A candidate shall be able to provide an external job description as text.
+
+---
+
+### FR-MATCH-02 — Platform Job Analysis [P1]
+
+A candidate shall be able to select a recruiter-created job and analyze an uploaded resume against its job description.
+
+---
+
+### FR-MATCH-03 — Job Match Output [P0]
+
+The AI-generated match analysis shall contain:
+
+* Job Match Score;
+* Matched Skills;
+* Missing Skills;
+* Missing Keywords;
+* Match Summary.
+
+---
+
+### FR-MATCH-04 — Score Disclaimer [P0]
+
+The application shall communicate that Job Match Score is an AI-generated estimate.
+
+It shall not be represented as an official score generated by an employer's Applicant Tracking System.
+
+---
+
+### FR-MATCH-05 — Input Requirements [P0]
+
+Job-match analysis requires:
+
+* an accessible candidate-owned resume;
+* extracted resume text;
+* a non-empty job description.
+
+---
+
+### FR-MATCH-06 — Match Failure Handling [P0]
+
+Gemini/API/validation failures shall result in an understandable error response rather than an indefinite loading state.
+
+---
+
+## 3.5 Job Management
+
+### FR-JOB-01 — Create Job [P1]
+
+A recruiter shall be able to create a job containing:
+
+* title;
+* description;
+* requirements;
+* required skills.
+
+---
+
+### FR-JOB-02 — View Recruiter Jobs [P1]
+
+A recruiter shall be able to view jobs they created.
+
+---
+
+### FR-JOB-03 — Browse Jobs [P1]
+
+Candidates shall be able to browse available jobs.
+
+---
+
+### FR-JOB-04 — View Job Details [P1]
+
+Candidates shall be able to view information about a selected job.
+
+---
+
+### FR-JOB-05 — Job Ownership [P1]
+
+A recruiter shall only be allowed to modify resources they own unless explicitly permitted otherwise.
+
+---
+
+## 3.6 Applications
+
+### FR-APP-01 — Apply to Job [P1]
+
+A candidate shall be able to apply to a platform job using one of their uploaded resumes.
+
+---
+
+### FR-APP-02 — Application Data [P1]
+
+An application shall associate:
+
+* candidate;
+* job;
+* selected resume;
+* application status;
+* application timestamp.
+
+---
+
+### FR-APP-03 — Initial Status [P1]
+
+New applications shall have:
+
+`PENDING`
+
+status.
+
+---
+
+### FR-APP-04 — View Candidate Applications [P1]
+
+Candidates shall be able to view their submitted applications and statuses.
+
+---
+
+### FR-APP-05 — View Applicants [P1]
+
+Recruiters shall be able to view applicants for jobs they own.
+
+---
+
+### FR-APP-06 — Review Applicant [P1]
+
+Recruiters shall be able to access relevant information for an applicant, including:
+
+* candidate information;
+* submitted resume;
+* available resume analysis;
+* available job-match analysis.
+
+---
+
+### FR-APP-07 — Update Application Status [P1]
+
+Recruiters shall be able to change application status from `PENDING` to:
+
+* `SHORTLISTED`;
+* `REJECTED`.
+
+---
+
+## 3.7 Optional Resume Recommendations
+
+The following are P2 requirements.
+
+### FR-REC-01 — Grammar Feedback [P2]
+
+The system may provide grammar or writing feedback.
+
+### FR-REC-02 — Learning Roadmap [P2]
+
+The system may generate a personalized learning roadmap.
+
+### FR-REC-03 — Recommended Roles [P2]
+
+The system may suggest job roles based on resume content.
+
+### FR-REC-04 — Project Recommendations [P2]
+
+The system may recommend projects based on identified skill gaps.
+
+### FR-REC-05 — Certification Recommendations [P2]
+
+The system may suggest relevant certifications.
+
+P2 requirements shall not delay the core MVP.
+
+---
+
+# 4. Non-Functional Requirements
+
+## 4.1 Security
+
+### NFR-SEC-01
+
+Passwords shall be stored using a secure password-hashing algorithm supported by Spring Security.
+
+### NFR-SEC-02
+
+Protected backend endpoints shall require authentication.
+
+### NFR-SEC-03
+
+Role-restricted endpoints shall enforce authorization on the backend.
+
+Frontend route protection alone shall not be considered sufficient security.
+
+### NFR-SEC-04
+
+Secrets including database credentials, JWT secrets, storage credentials, and Gemini API credentials shall not be committed to Git.
+
+### NFR-SEC-05
+
+Resume ownership and job ownership shall be validated before protected resources are returned or modified.
+
+### NFR-SEC-06
+
+Uploaded files shall be validated before processing.
+
+---
+
+## 4.2 Reliability
+
+### NFR-REL-01
+
+Failures from external services shall be handled without crashing the application.
+
+### NFR-REL-02
+
+Gemini failures shall result in controlled application errors.
+
+### NFR-REL-03
+
+Failed AI operations shall not remain indefinitely in a processing state.
+
+### NFR-REL-04
+
+The system shall avoid storing incomplete AI analysis as successfully completed analysis.
+
+---
+
+## 4.3 Performance
+
+### NFR-PERF-01
+
+Normal non-AI API operations should provide responsive interaction under portfolio/demo-scale usage.
+
+### NFR-PERF-02
+
+AI operations may take longer than normal API operations and shall display an appropriate processing state.
+
+### NFR-PERF-03
+
+Large result sets should use pagination where necessary rather than returning unbounded data.
+
+---
+
+## 4.4 Maintainability
+
+### NFR-MAIN-01
+
+Backend code shall separate API, business, persistence, security, and external integration responsibilities.
+
+### NFR-MAIN-02
+
+Persistence entities shall not be used directly as public API contracts where DTOs provide a clearer boundary.
+
+### NFR-MAIN-03
+
+Gemini-specific integration logic shall be isolated from core resume-analysis business logic.
+
+### NFR-MAIN-04
+
+Frontend code should be organized by features and reusable components rather than placing the entire application in a small number of large files.
+
+---
+
+## 4.5 Usability
+
+### NFR-USE-01
+
+Candidate and recruiter experiences shall provide clearly separated navigation.
+
+### NFR-USE-02
+
+Users shall receive understandable validation and error messages.
+
+### NFR-USE-03
+
+AI operations shall communicate loading, success, and failure states.
+
+### NFR-USE-04
+
+The application should be usable on common desktop and mobile screen sizes.
+
+---
+
+## 4.6 Documentation
+
+### NFR-DOC-01
+
+REST APIs shall be documented using OpenAPI/Swagger.
+
+### NFR-DOC-02
+
+The repository shall contain setup instructions.
+
+### NFR-DOC-03
+
+Important architecture decisions shall be documented.
+
+---
+
+## 4.7 Testing and CI
+
+### NFR-TEST-01
+
+Important backend business logic shall have automated tests.
+
+### NFR-TEST-02
+
+Authentication, authorization, resume processing, and AI-response handling shall receive testing priority.
+
+### NFR-TEST-03
+
+GitHub Actions shall automatically run basic validation such as backend tests and application builds.
+
+---
+
+## 4.8 Deployment
+
+### NFR-DEP-01
+
+The frontend shall be deployable to Vercel.
+
+### NFR-DEP-02
+
+The backend shall be deployable to Render.
+
+### NFR-DEP-03
+
+PostgreSQL and file storage shall use Supabase.
+
+### NFR-DEP-04
+
+Production secrets shall be provided through environment configuration.
+
+### NFR-DEP-05
+
+The backend shall provide a Dockerfile for containerized execution.
+
+---
+
+# 5. External Dependencies
+
+Version 1 depends on:
+
+### Gemini API
+
+Used for:
+
+* general resume analysis;
+* job-specific resume matching.
+
+### Supabase PostgreSQL
+
+Used as the relational application database.
+
+### Supabase Storage
+
+Used for uploaded resume files.
+
+### Vercel
+
+Used for frontend deployment.
+
+### Render
+
+Used for backend deployment.
+
+Failures or limitations of external services should be handled where practical.
+
+---
+
+# 6. Data Requirements
+
+The system requires persistent data for concepts including:
+
+* users;
+* roles;
+* resumes;
+* resume analyses;
+* jobs;
+* applications;
+* job-match analyses.
+
+Exact entities, attributes, keys, relationships, constraints, and indexes will be defined in the Database Schema and ERD planning stages.
+
+---
+
+# 7. Version 1 Boundaries
+
+Version 1 will not require:
+
+* admin functionality;
+* social networking;
+* messaging;
+* company-scale ATS functionality;
+* automatic hiring decisions;
+* candidate ranking;
+* advanced search;
+* OCR;
+* resume rewriting;
+* microservices;
+* event streaming;
+* Kubernetes;
+* LangChain4j.
+
+These capabilities are outside the MVP requirements.
+
+---
+
+# 8. MVP Completion Definition
+
+### Core MVP
+
+The core MVP is complete when this workflow operates reliably:
+
+Candidate
+
+→ Register/Login
+
+→ Upload Resume
+
+→ Extract Resume Text
+
+→ General Resume Analysis
+
+→ View Resume Intelligence
+
+→ Paste Job Description
+
+→ Job Match Analysis
+
+→ View Match Insights
+
+### Portfolio-Ready MVP
+
+The portfolio-ready release additionally supports:
+
+Recruiter
+
+→ Register/Login
+
+→ Create Job
+
+→ Candidate Browses Job
+
+→ Candidate Analyzes Match
+
+→ Candidate Applies
+
+→ Recruiter Reviews Applicant
+
+→ Recruiter Shortlists/Rejects
+
+and includes:
+
+* automated tests;
+* API documentation;
+* Docker;
+* CI;
+* cloud deployment;
+* project documentation.
+
+---
+
+# 9. Requirement Prioritization Rule
+
+Development shall follow:
+
+**P0 → P1 → Stabilization → Deployment → P2**
+
+If the 25–30-hour development target is threatened, P2 requirements shall be removed first.
+
+Core security, error handling, testing of critical functionality, and deployment shall not be sacrificed merely to add optional features.
